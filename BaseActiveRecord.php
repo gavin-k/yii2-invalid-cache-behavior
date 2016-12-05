@@ -12,15 +12,10 @@ class BaseActiveRecord extends ActiveRecord
     const CACHE_LOG_CATEGORY = "cacheDb";
 
     /**
-     *
      * $data = $this->rdCache($key, function() use ($start, $limit, $styleId){
-     * 			$sql = "SELECT a.id as id,a.albumid as albumid FROM `song` a join idx_album_style b where b.album_id = a.albumid and b.style_id={$styleId} order by a.orderbynum desc limit {$start},{$limit}";
+     * 			$sql = "SELECT a.id FROM `post` a order by a.sort desc limit {$start},{$limit}";
      * 			$data = $this->rows($sql);
-     * 			$ret = array();
-     * 			foreach($data as $val){
-     * 				$ret[$val['albumid']][] = $val['id'];
-     * 			}
-     * 			return $ret;
+     * 			return $data
      * }, 300);
      * 缓存数据库中的值
      * @param string   $key   键
@@ -33,11 +28,9 @@ class BaseActiveRecord extends ActiveRecord
     public static function rdCache($key, callable $func, $cacheTime = 0, $flush = false)
     {
         if ($flush)
-//			Yii::$app->cache->redis->del($key);
             Yii::$app->cache->delete($key);
 
         $cachedData = Yii::$app->cache->get($key);
-//		$cachedData = Yii::$app->cache->getValue($key);
         if ($cachedData !== false) {
             YII_DEBUG && Yii::info("single|all_hit|{$cacheTime}|{$key}", self::CACHE_LOG_CATEGORY);// 分类到 相应的日志中
             return $cachedData;
@@ -47,7 +40,6 @@ class BaseActiveRecord extends ActiveRecord
 
         $data = call_user_func($func);//若 缓存中没有,则到数据库中查找
         if ($data !== null)// 若缓存不为空,则 缓存起来
-//			Yii::$app->cache->setValue($key, $data, self::getRandomTime($cacheTime));
             Yii::$app->cache->set($key, $data, self::getRandomTime($cacheTime));
 
         return $data;
@@ -84,32 +76,17 @@ class BaseActiveRecord extends ActiveRecord
             $cachedData = [];
             array_map(function($v){
                 Yii::$app->cache->delete($v);
-//				Yii::$app->cache->redis->del($v);
             },$keys);
         } else {
             $allCachedData = Yii::$app->cache->multiGet($keys);
-//			$allCachedData = Yii::$app->cache->getValues($keys);
             $cachedData = [];
             foreach($allCachedData as $key=>$value){
                 if($value!==false){//若取出来的数组中不包含 false 的话
                     $cachedData = array_merge($cachedData,[$key=>$value]);
                 }
             }
-//			if ($cachedData === false)
-//				$cachedData = [];
         }
 
-        /**
-         * $array1 = array("a" => "green", "red", "blue", "red");
-         * $array2 = array("b" => "green", "yellow", "red");
-         * $result = array_diff($array1, $array2);
-         *
-         * printf :
-         * Array
-         *	(
-         *		[1] => blue
-         *	)
-         */
         $noCachedKeys = array_diff($keys, array_keys($cachedData));// 获取  未缓存的 key
         if (empty($noCachedKeys)) {
             YII_DEBUG && Yii::info("multi |all_hit|{$cacheTime}|" . implode(',', $keys), self::CACHE_LOG_CATEGORY);
@@ -134,7 +111,6 @@ class BaseActiveRecord extends ActiveRecord
         }
 
         if ($data)
-//			Yii::$app->cache->setValues($cacheData, $cacheTime);
             Yii::$app->cache->multiSet($cacheData, $cacheTime);
 
         return array_values(array_merge($data, $cachedData));
@@ -151,10 +127,8 @@ class BaseActiveRecord extends ActiveRecord
     public static function rdObjCache($key, callable $func, $cacheTime = 0, $flush = false)
     {
         if ($flush)
-//			Yii::$app->cache->redis->del($key);
             Yii::$app->cache->delete($key);
 
-//		$cachedData = Yii::$app->cache->getValue($key);
         $cachedData = Yii::$app->cache->get($key);
         if ($cachedData !== false) {
             YII_DEBUG && Yii::info("single|all_hit|{$cacheTime}|{$key}", self::CACHE_LOG_CATEGORY);// 分类到 相应的日志中
@@ -165,7 +139,6 @@ class BaseActiveRecord extends ActiveRecord
 
         $data = call_user_func($func);//若 缓存中没有,则到数据库中查找
         if ($data !== null)// 若缓存不为空,则 缓存起来
-//			Yii::$app->cache->setValue($key, serialize($data), self::getRandomTime($cacheTime));
             Yii::$app->cache->set($key, serialize($data), self::getRandomTime($cacheTime));
 
         return $data;
@@ -194,11 +167,9 @@ class BaseActiveRecord extends ActiveRecord
             $cachedData = [];
             array_map(function($v){
                 Yii::$app->cache->delete($v);
-//				Yii::$app->cache->redis->del($v);
             },$keys);
         } else {
             $allCachedData = Yii::$app->cache->multiGet($keys);
-//			$allCachedData = Yii::$app->cache->getValues($keys);
             $cachedData = [];
             foreach($allCachedData as $key=>$value){
                 if($value!==false){//若取出来的数组中不包含 false 的话
@@ -231,7 +202,6 @@ class BaseActiveRecord extends ActiveRecord
         }
 
         if ($data)
-//			Yii::$app->cache->setValues($cacheData, $cacheTime);
             Yii::$app->cache->multiSet($cacheData, $cacheTime);
 
         return array_values(array_merge($data, $cachedData));
@@ -250,6 +220,5 @@ class BaseActiveRecord extends ActiveRecord
 
         return $time + mt_rand(1, 5);
     }
-
 
 }
