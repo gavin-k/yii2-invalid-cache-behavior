@@ -1,0 +1,20 @@
+{
+    "name": "gavin-k/yii2-invalid-cache-behavior",
+    "description": "Redis Cache,ActiveRecord for the Yii framework",
+    "keywords": ["yii2", "redis", "active-record", "cache"],
+    "type": "yii2-extension",
+    "authors": [
+        {
+            "name": "gavin-k",
+            "email": "lijy0717@gmail.com"
+        }
+    ],
+    "require": {
+        "yiisoft/yii2-redis" : "*"
+    },
+    "license": "BSD-3-Clause",
+    "minimum-stability": "beta",
+    "autoload": {
+        "psr-4": { "yii2invalidcache\\behaviors\\": "" }
+    }
+}
