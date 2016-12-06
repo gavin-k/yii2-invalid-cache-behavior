@@ -15,7 +15,13 @@
 ----------------------------------------
 ```
 "require" : {
-    "pyurin/yii2-redis-ha":"*"
+    "gavin-k/yii2-invalid-cache-behavior":"*"
 },
 
 ```
+
+或者使用命令: 
+```
+composer require gavin-k/yii2-invalid-cache-behavior
+```
+
